@@ -2,7 +2,7 @@
 
 Library to provide user authentication and access management, browser-based JavaScript client Angularjs applications.
 
-[![npm](https://img.shields.io/npm/v/ngAuthMiddleware?style=flat-square)](https://www.npmjs.com/package/ngAuthMiddleware)
+[![npm](https://img.shields.io/npm/v/ng-auth-middleware?style=flat-square)](https://www.npmjs.com/package/ng-auth-middleware)
 
 ## Getting started
 

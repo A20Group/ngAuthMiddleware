@@ -41,17 +41,19 @@ function authProvider() {
                     }
                 };
 
-                var startSignIn = function (authData) {
+                var startSignIn = function (authData, pageHandlerStatus) {
                     authService.saveAuthData(authData);
                     if (config.withPermission) {
                         authService.permissionHandler("signIn");
                         authService.uiRouterSync();
                     }
-                    authService.pageStateNameHandler(
-                        "signIn",
-                        authData[config.rolePropertyName],
-                        config
-                    );
+                    if (pageHandlerStatus) {
+                        authService.pageStateNameHandler(
+                            "signIn",
+                            authData[config.rolePropertyName],
+                            config
+                        );
+                    }
                 };
 
                 var startLogout = function () {
@@ -95,8 +97,15 @@ function authProvider() {
                         return notAuthorized();
                     },
 
-                    signIn: function (authData) {
-                        startSignIn(authData);
+                    signIn: function (authData, pageHandler) {
+                        let pageHandlerStatus;
+                        if (pageHandler == false) {
+                            pageHandlerStatus = false;
+                        }
+                        else {
+                            pageHandlerStatus = true;
+                        }
+                        startSignIn(authData, pageHandlerStatus);
                     },
 
                     logOut: function () {

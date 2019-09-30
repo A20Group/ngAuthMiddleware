@@ -1,4 +1,6 @@
 var CryptoJS = require("crypto-js");
+
+import secretKey from "./secretKey";
 const SECRETKEY = secretKey("0x0");
 
 /* @ngInject */
