@@ -105,6 +105,11 @@ function authProvider() {
                         else {
                             pageHandlerStatus = true;
                         }
+
+                        let oldData = authService.getAuthData();
+                        if (oldData) {
+                            authService.clearAuthData()
+                        }
                         startSignIn(authData, pageHandlerStatus);
                     },
 
