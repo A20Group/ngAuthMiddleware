@@ -87,18 +87,25 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
         }
     };
 
-    service.permissionHandler = function (action) {
+    service.permissionHandler = function (permissionPropertyName, action) {
         PermPermissionStore.clearStore();
         if (action == "signIn") {
-            let authData = service.getAuthData();
-            let userRoles = authData[config.rolePropertyName];
-            var permissions = ["authorized", userRoles];
-            PermPermissionStore.defineManyPermissions(
-                permissions,
-    /*@ngInject*/ function (permissionName) {
-                    return permissions.includes(permissionName);
-                }
-            );
+            if (!permissionPropertyName) {
+                let authData = service.getAuthData();
+                let userPermissions = authData[permissionPropertyName];
+                var permissions = ["authorized", userPermissions];
+                PermPermissionStore.defineManyPermissions(
+                    permissions,
+        /*@ngInject*/ function (permissionName) {
+                        return permissions.includes(permissionName);
+                    }
+                );
+            }
+            else {
+                throw new Error(
+                    "permissionPropertyName requirement for permissionHandler function"
+                );
+            }
         } else if (action == "logOut") {
             PermPermissionStore.definePermission("anonymous", function () {
                 return true;
@@ -108,6 +115,7 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
                 "permissionHandler need one action for input function"
             );
         }
+
     };
 
     service.saveAuthData = function (authData) {

@@ -3,8 +3,9 @@ function authProvider() {
     // Default configuration
     var config = {
         rolePropertyName: null,
+        permissionPropertyName: null,
         withPermission: false,
-        roles: null
+        roles: null,
     };
 
     return {
@@ -23,9 +24,15 @@ function authProvider() {
                         "roles is a required field and should be is Array."
                     );
                 }
+
                 if (!config.rolePropertyName) {
                     throw new Error(
                         "rolePropertyName is a required field"
+                    );
+                }
+                if (!config.permissionPropertyName && config.withPermission) {
+                    throw new Error(
+                        "permissionPropertyName is a required field"
                     );
                 }
 
@@ -33,7 +40,7 @@ function authProvider() {
                     let authData = authService.getAuthData();
                     if (authData) {
                         if (config.withPermission) {
-                            authService.permissionHandler("signIn");
+                            authService.permissionHandler(config.permissionPropertyName, "signIn");
                             authService.uiRouterSync();
                         }
                     } else {
@@ -44,7 +51,7 @@ function authProvider() {
                 var startSignIn = function (authData, pageHandlerStatus) {
                     authService.saveAuthData(authData);
                     if (config.withPermission) {
-                        authService.permissionHandler("signIn");
+                        authService.permissionHandler(config.permissionPropertyName, "signIn");
                         authService.uiRouterSync();
                     }
                     if (pageHandlerStatus) {
@@ -70,8 +77,10 @@ function authProvider() {
                     let authData = authService.getAuthData();
                     authData[config.rolePropertyName] = newRoleName;
                     authService.saveAuthData(authData);
-                    authService.permissionHandler("signIn");
-                    authService.uiRouterSync();
+                    if (config.withPermission) {
+                        authService.permissionHandler(config.permissionPropertyName, "signIn");
+                        authService.uiRouterSync();
+                    }
                     authService.pageStateNameHandler(
                         "signIn",
                         authData[config.rolePropertyName],

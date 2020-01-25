@@ -34,6 +34,8 @@ app.config([
 
       rolePropertyName: "userRole", // property name of role which become from server
 
+      permissionPropertyName: "userPermissions", // property name of permission which become from server.
+
       roles: [
         {
           action: "href", // href or state
@@ -62,17 +64,21 @@ There is a full example in the sample Folder.
 App.congif.$inject = ["$authProvider"];
 function AppConfig(authProvider) {
   authProvider.configure({
+
     withPermission: true,
-    signAction: "state",
+    permissionPropertyName: "userPermissions",
+
+    rolePropertyName: "userRole",
+
     roles: [
       {
         action: "href",
         roleName: "default",
-        afterSignIn: "module.panel.dashboard",
-        afterLogOut: "authorization.login"
+        afterSignIn: "https://www.npmjs.com/package/ng-auth-middleware",
+        afterLogOut: "https://www.npmjs.com"
       },
       {
-        action: "href",
+        action: "state",
         roleName: "admin",
         afterSignIn: "admin.panel.dashboard",
         afterLogOut: "authorization.login"
@@ -161,7 +167,7 @@ Inject `$authProvider` in config file, as mentioned above the object exist in `a
 
 ```javascript
 authProvider.configure({
-  withPermission: true,
+  withPermission: false,
 
   rolePropertyName: "userRole",
 
@@ -182,6 +188,10 @@ authProvider.configure({
 #### "with permission":
 
 Could set false or true, if set false you haven't connection with angular-permission else you have connected with angular-permission, if you dont set value by default set false.
+
+#### "permissionPropertyName":
+
+The response you receive from the server in which property the permissions are assigned. if 'withPermission' is true, it will be requirement.
 
 #### "rolePropertyName":
 
