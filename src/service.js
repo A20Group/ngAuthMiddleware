@@ -87,23 +87,23 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
         }
     };
 
-    service.permissionHandler = function (permissionPropertyName, action) {
+    service.permissionHandler = function (action, config) {
         PermPermissionStore.clearStore();
         if (action == "signIn") {
-            if (!permissionPropertyName) {
-                let authData = service.getAuthData();
-                let userPermissions = authData[permissionPropertyName];
-                var permissions = ["authorized", userPermissions];
+            if (config.permissionPropertyName) {
+                let authData = service.getAuthData(config);
+                let userPermissions = authData[config.permissionPropertyName];
+                let permissions = ["authorized", userPermissions];
                 PermPermissionStore.defineManyPermissions(
                     permissions,
-        /*@ngInject*/ function (permissionName) {
+              /*@ngInject*/ function (permissionName) {
                         return permissions.includes(permissionName);
                     }
                 );
             }
             else {
                 throw new Error(
-                    "permissionPropertyName requirement for permissionHandler function"
+                    `permissionPropertyName: ${config.permissionPropertyName} \n permissionPropertyName requirement for permissionHandler function`
                 );
             }
         } else if (action == "logOut") {
@@ -112,7 +112,7 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
             });
         } else {
             throw new Error(
-                "permissionHandler need one action for input function"
+                `currentAction : ${action} \n permissionHandler need one action for input function`
             );
         }
 
@@ -128,9 +128,29 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
         let date = new Date();
         date.setTime(date.getTime() + expires_in * 1000);
         let expires = date.toGMTString();
-        $cookies.putObject("authData", encryptAuthData, {
+        $cookies.put("authData", encryptAuthData, {
             expires: expires
         });
+    };
+
+    service.savePermissionData = function (permissionData) {
+        let rawPermissionData = permissionData;
+
+        if (!(typeof rawPermissionData === 'string' || rawPermissionData instanceof String || Array.isArray(rawPermissionData))) {
+            throw new Error(
+                `permissionPropertyName value must be string or array`
+            );
+        }
+
+        if (Array.isArray(rawPermissionData)) {
+            rawPermissionData = rawPermissionData.toString();
+        }
+        
+        var encryptPermissionData = CryptoJS.AES.encrypt(
+            JSON.stringify(rawPermissionData),
+            SECRETKEY
+        ).toString();
+        localStorage["permissionData"] = encryptPermissionData;
     };
 
     service.hasValidToken = function () {
@@ -193,13 +213,22 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
         }
     };
 
-    service.getAuthData = function () {
-        let authData = $cookies.getObject("authData");
+    service.getAuthData = function (config = { withPermission: false, permissionPropertyName: "permission" }) {
+        let authData = $cookies.get("authData");
         if (authData) {
-            var bytesAuthData = CryptoJS.AES.decrypt(authData, SECRETKEY);
+            let bytesAuthData = CryptoJS.AES.decrypt(authData, SECRETKEY);
             var decryptedAuthData = JSON.parse(
                 bytesAuthData.toString(CryptoJS.enc.Utf8)
             );
+
+            if (config.withPermission) {
+                let permissionData = localStorage["permissionData"];
+                let bytesPermissionData = CryptoJS.AES.decrypt(permissionData, SECRETKEY);
+                let decryptedPermissionData = JSON.parse(
+                    bytesPermissionData.toString(CryptoJS.enc.Utf8)
+                );
+                decryptedAuthData[config.permissionPropertyName] = decryptedPermissionData;
+            }
             return decryptedAuthData;
         } else {
             return false;
@@ -208,6 +237,7 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
 
     service.clearAuthData = function () {
         $cookies.remove("authData");
+        localStorage.removeItem("permissionData");
     };
 }
 

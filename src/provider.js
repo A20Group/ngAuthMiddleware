@@ -37,23 +37,27 @@ function authProvider() {
                 }
 
                 var init = function () {
-                    let authData = authService.getAuthData();
+                    let authData = authService.getAuthData(config);
                     if (authData) {
-                        if (config.withPermission) {
-                            authService.permissionHandler(config.permissionPropertyName, "signIn");
-                            authService.uiRouterSync();
-                        }
+                        authService.permissionHandler("signIn", config);
+                        authService.uiRouterSync();
                     } else {
                         startLogout();
                     }
                 };
 
                 var startSignIn = function (authData, pageHandlerStatus) {
-                    authService.saveAuthData(authData);
+
                     if (config.withPermission) {
-                        authService.permissionHandler(config.permissionPropertyName, "signIn");
-                        authService.uiRouterSync();
+                        let permissionData = authData[config.permissionPropertyName];
+                        authService.savePermissionData(permissionData);
+                        delete authData[config.permissionPropertyName];
                     }
+
+                    authService.saveAuthData(authData);
+
+                    authService.permissionHandler("signIn", config);
+                    authService.uiRouterSync();
                     if (pageHandlerStatus) {
                         authService.pageStateNameHandler(
                             "signIn",
@@ -64,23 +68,19 @@ function authProvider() {
                 };
 
                 var startLogout = function () {
-                    let authData = authService.getAuthData();
+                    let authData = authService.getAuthData(config);
                     authService.clearAuthData();
-                    if (config.withPermission) {
-                        authService.permissionHandler("logOut");
-                        authService.uiRouterSync();
-                    }
+                    authService.permissionHandler("logOut");
+                    authService.uiRouterSync();
                     authService.pageStateNameHandler("logOut", authData[config.rolePropertyName], config);
                 };
 
                 var updateRole = function (newRoleName) {
-                    let authData = authService.getAuthData();
+                    let authData = authService.getAuthData(config);
                     authData[config.rolePropertyName] = newRoleName;
                     authService.saveAuthData(authData);
-                    if (config.withPermission) {
-                        authService.permissionHandler(config.permissionPropertyName, "signIn");
-                        authService.uiRouterSync();
-                    }
+                    authService.permissionHandler("signIn", config);
+                    authService.uiRouterSync();
                     authService.pageStateNameHandler(
                         "signIn",
                         authData[config.rolePropertyName],
@@ -89,7 +89,7 @@ function authProvider() {
                 };
 
                 var notAuthorized = function () {
-                    let authData = authService.getAuthData();
+                    let authData = authService.getAuthData(config);
                     return authService.notAuthorized(authData, config);
                 };
 
@@ -115,7 +115,7 @@ function authProvider() {
                             pageHandlerStatus = true;
                         }
 
-                        let oldData = authService.getAuthData();
+                        let oldData = authService.getAuthData(config);
                         if (oldData) {
                             authService.clearAuthData()
                         }
@@ -127,7 +127,7 @@ function authProvider() {
                     },
 
                     user: function () {
-                        return authService.getAuthData();
+                        return authService.getAuthData(config);
                     },
 
                     updateRole: function (newRoleName) {

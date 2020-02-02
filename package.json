@@ -1,6 +1,6 @@
 {
   "name": "ng-auth-middleware",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Authorization library For AngularJS",
   "license": "MIT",
   "repository": "abdollahzadehghalejoghi/ngAuthMiddleware",
