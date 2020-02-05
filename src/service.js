@@ -93,7 +93,13 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
             if (config.permissionPropertyName) {
                 let authData = service.getAuthData(config);
                 let userPermissions = authData[config.permissionPropertyName];
-                let permissions = ["authorized", userPermissions];
+                let permissions = ["authorized"];
+                if (userPermissions) {
+                    userPermissions = userPermissions.split(",");
+                    if (userPermissions.length > 0) {
+                        permissions.concat(userPermissions);
+                    }
+                }
                 PermPermissionStore.defineManyPermissions(
                     permissions,
               /*@ngInject*/ function (permissionName) {
@@ -134,23 +140,25 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
     };
 
     service.savePermissionData = function (permissionData) {
-        let rawPermissionData = permissionData;
+        if (permissionData) {
+            let rawPermissionData = permissionData;
 
-        if (!(typeof rawPermissionData === 'string' || rawPermissionData instanceof String || Array.isArray(rawPermissionData))) {
-            throw new Error(
-                `permissionPropertyName value must be string or array`
-            );
-        }
+            if (!(typeof rawPermissionData === 'string' || rawPermissionData instanceof String || Array.isArray(rawPermissionData))) {
+                throw new Error(
+                    `permissionPropertyName value must be string or array`
+                );
+            }
 
-        if (Array.isArray(rawPermissionData)) {
-            rawPermissionData = rawPermissionData.toString();
+            if (Array.isArray(rawPermissionData)) {
+                rawPermissionData = rawPermissionData.toString();
+            }
+
+            var encryptPermissionData = CryptoJS.AES.encrypt(
+                JSON.stringify(rawPermissionData),
+                SECRETKEY
+            ).toString();
+            localStorage["permissionData"] = encryptPermissionData;
         }
-        
-        var encryptPermissionData = CryptoJS.AES.encrypt(
-            JSON.stringify(rawPermissionData),
-            SECRETKEY
-        ).toString();
-        localStorage["permissionData"] = encryptPermissionData;
     };
 
     service.hasValidToken = function () {
@@ -223,11 +231,13 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
 
             if (config.withPermission) {
                 let permissionData = localStorage["permissionData"];
-                let bytesPermissionData = CryptoJS.AES.decrypt(permissionData, SECRETKEY);
-                let decryptedPermissionData = JSON.parse(
-                    bytesPermissionData.toString(CryptoJS.enc.Utf8)
-                );
-                decryptedAuthData[config.permissionPropertyName] = decryptedPermissionData;
+                if (permissionData) {
+                    let bytesPermissionData = CryptoJS.AES.decrypt(permissionData, SECRETKEY);
+                    let decryptedPermissionData = JSON.parse(
+                        bytesPermissionData.toString(CryptoJS.enc.Utf8)
+                    );
+                    decryptedAuthData[config.permissionPropertyName] = decryptedPermissionData;
+                }
             }
             return decryptedAuthData;
         } else {
