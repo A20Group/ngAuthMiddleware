@@ -94,12 +94,14 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
                 let authData = service.getAuthData(config);
                 let userPermissions = authData[config.permissionPropertyName];
                 let permissions = ["authorized"];
+
                 if (userPermissions) {
                     userPermissions = userPermissions.split(",");
                     if (userPermissions.length > 0) {
-                        permissions.concat(userPermissions);
+                        permissions = permissions.concat(userPermissions);
                     }
                 }
+
                 PermPermissionStore.defineManyPermissions(
                     permissions,
               /*@ngInject*/ function (permissionName) {
