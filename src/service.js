@@ -223,8 +223,23 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
         }
     };
 
+    service.IsValidJSONString = function (str) {
+        try {
+            JSON.parse(str);
+        } catch (e) {
+            return false;
+        }
+        return true;
+    }
+
     service.getAuthData = function (config = { withPermission: false, permissionPropertyName: "permission" }) {
         let authData = $cookies.get("authData");
+
+        if (service.IsValidJSONString(authData)) {
+            service.clearAuthData();
+            return false;
+        }
+
         if (authData) {
             let bytesAuthData = CryptoJS.AES.decrypt(authData, SECRETKEY);
             var decryptedAuthData = JSON.parse(
