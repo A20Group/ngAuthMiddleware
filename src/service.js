@@ -90,30 +90,23 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
     service.permissionHandler = function (action, config) {
         PermPermissionStore.clearStore();
         if (action == "signIn") {
-            if (config.permissionPropertyName) {
-                let authData = service.getAuthData(config);
-                let userPermissions = authData[config.permissionPropertyName];
-                let permissions = ["authorized"];
+            let authData = service.getAuthData(config);
+            let userPermissions = authData[config.permissionPropertyName];
+            let permissions = ["authorized"];
 
-                if (userPermissions) {
-                    userPermissions = userPermissions.split(",");
-                    if (userPermissions.length > 0) {
-                        permissions = permissions.concat(userPermissions);
-                    }
+            if (userPermissions) {
+                userPermissions = userPermissions.split(",");
+                if (userPermissions.length > 0) {
+                    permissions = permissions.concat(userPermissions);
                 }
+            }
 
-                PermPermissionStore.defineManyPermissions(
-                    permissions,
+            PermPermissionStore.defineManyPermissions(
+                permissions,
               /*@ngInject*/ function (permissionName) {
-                        return permissions.includes(permissionName);
-                    }
-                );
-            }
-            else {
-                throw new Error(
-                    `permissionPropertyName: ${config.permissionPropertyName} \n permissionPropertyName requirement for permissionHandler function`
-                );
-            }
+                    return permissions.includes(permissionName);
+                }
+            );
         } else if (action == "logOut") {
             PermPermissionStore.definePermission("anonymous", function () {
                 return true;
