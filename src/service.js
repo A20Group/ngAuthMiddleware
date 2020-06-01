@@ -33,56 +33,56 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
         }
     };
 
-    service.pageStateNameHandler = function (action, roles, config) {
-        if (roles) {
-            let userRoles = roles.split(",");
-            let allRoles = config.roles;
+    service.pageStateNameHandler = function (action, roles = "", config) {
+        let userRoles = roles.split(",").filter(rule => rule);
+        let allRoles = config.roles;
 
-            if (userRoles.length == 1) {
-                let userRole = {};
-                for (let i = 0; i < allRoles.length; i++) {
-                    if (userRoles[i] != null) {
-                        userRole = allRoles.find(
-                            state => state.roleName === userRoles[i]
-                        );
-                    }
-                }
-                if (action == "signIn") {
-                    service.signHandler(userRole.action, userRole.afterSignIn)
-                } else if (action == "logOut") {
-                    service.signHandler(userRole.action, userRole.afterLogOut)
-                } else {
-                    throw new Error(
-                        "pageStateNameHandler need one action for input function"
-                    );
-                }
-            } else if (userRoles.length >= 1) {
-
-                let multiRole = allRoles.find(
-                    state => state.roleName === "multiRole"
-                );
-                if (action == "signIn") {
-                    service.signHandler(multiRole.action, multiRole.afterSignIn)
-                } else if (action == "logOut") {
-                    service.signHandler(multiRole.action, multiRole.afterLogOut)
-                } else {
-                    throw new Error(
-                        "pageStateNameHandler need one action for input function"
-                    );
-                }
+        if (userRoles[0] == "" || userRoles.length == 0) {
+            let defaultRole = allRoles.find(
+                state => state.roleName === "default"
+            );
+            if (action == "signIn") {
+                service.signHandler(defaultRole.action, defaultRole.afterSignIn)
+            } else if (action == "logOut") {
+                service.signHandler(defaultRole.action, defaultRole.afterLogOut)
             } else {
-                let defaultState = allRoles.find(
-                    state => state.roleName === "defaultState"
+                throw new Error(
+                    "pageStateNameHandler need one action for input function"
                 );
-                if (action == "signIn") {
-                    service.signHandler(defaultState.action, defaultState.afterSignIn)
-                } else if (action == "logOut") {
-                    service.signHandler(defaultState.action, defaultState.afterLogOut)
-                } else {
-                    throw new Error(
-                        "pageStateNameHandler need one action for input function"
+            }
+        }
+        else if (userRoles.length == 1) {
+            let userRole = {};
+            for (let i = 0; i < allRoles.length; i++) {
+                if (userRoles[i] != null) {
+                    userRole = allRoles.find(
+                        state => state.roleName === userRoles[i]
                     );
                 }
+            }
+            if (action == "signIn") {
+                service.signHandler(userRole.action, userRole.afterSignIn)
+            } else if (action == "logOut") {
+                service.signHandler(userRole.action, userRole.afterLogOut)
+            } else {
+                throw new Error(
+                    "pageStateNameHandler need one action for input function"
+                );
+            }
+        }
+        else if (userRoles.length >= 1) {
+
+            let multiRole = allRoles.find(
+                state => state.roleName === "multiRole"
+            );
+            if (action == "signIn") {
+                service.signHandler(multiRole.action, multiRole.afterSignIn)
+            } else if (action == "logOut") {
+                service.signHandler(multiRole.action, multiRole.afterLogOut)
+            } else {
+                throw new Error(
+                    "pageStateNameHandler need one action for input function"
+                );
             }
         }
     };
@@ -184,7 +184,7 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
         let allRoles = config.roles;
         if (!authData) {
             let afterLogOut = allRoles.find(
-                state => state.roleName === "defaultState"
+                state => state.roleName === "default"
             ).afterLogOut;
             return afterLogOut;
         }

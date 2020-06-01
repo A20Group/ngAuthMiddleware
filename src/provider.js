@@ -25,7 +25,7 @@ function authProvider() {
                     );
                 }
 
-                if (!config.rolePropertyName) {
+                if (!config.rolePropertyName && config.roles.length > 1) {
                     throw new Error(
                         "rolePropertyName is a required field"
                     );
