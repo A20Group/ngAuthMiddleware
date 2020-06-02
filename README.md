@@ -212,10 +212,13 @@ Could set name of role and you can set just one role, if your project has multiR
 ##### "afterSignIn":
 
 As is clear from the word, which page to go after login.
+for deactive this,set false.
+
 
 ##### "afterLogOut":
 
 As is clear from the word, which page to go after logOut.
+for deactive this,set false.
 
 ## Feedback, Feature requests, and Bugs
 

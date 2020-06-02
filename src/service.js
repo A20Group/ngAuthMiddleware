@@ -17,6 +17,10 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
 
     //After SignIn And SignOut Action Handler 
     service.signHandler = function (action, target) {
+        if (!target) {
+            return;
+        }
+
         let targetAction = action || "state";
         if (targetAction == "state") {
             $timeout(function () {
