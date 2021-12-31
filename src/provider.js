@@ -5,6 +5,7 @@ function authProvider() {
         rolePropertyName: null,
         permissionPropertyName: null,
         withPermission: false,
+        tokenStorage: 'cookie',
         roles: null,
     };
 
@@ -54,7 +55,7 @@ function authProvider() {
                         delete authData[config.permissionPropertyName];
                     }
 
-                    authService.saveAuthData(authData);
+                    authService.saveAuthData(authData,config.tokenStorage);
 
                     authService.permissionHandler("signIn", config);
                     authService.uiRouterSync();
@@ -69,7 +70,7 @@ function authProvider() {
 
                 var startLogout = function () {
                     let authData = authService.getAuthData(config);
-                    authService.clearAuthData();
+                    authService.clearAuthData(config.tokenStorage);
                     authService.permissionHandler("logOut");
                     authService.uiRouterSync();
                     authService.pageStateNameHandler("logOut", authData[config.rolePropertyName], config);
@@ -78,7 +79,7 @@ function authProvider() {
                 var updateRole = function (newRoleName) {
                     let authData = authService.getAuthData(config);
                     authData[config.rolePropertyName] = newRoleName;
-                    authService.saveAuthData(authData);
+                    authService.saveAuthData(authData,config.tokenStorage);
                     authService.permissionHandler("signIn", config);
                     authService.uiRouterSync();
                     authService.pageStateNameHandler(
@@ -117,7 +118,7 @@ function authProvider() {
 
                         let oldData = authService.getAuthData(config);
                         if (oldData) {
-                            authService.clearAuthData()
+                            authService.clearAuthData(config.tokenStorage)
                         }
                         startSignIn(authData, pageHandlerStatus);
                     },

@@ -30,8 +30,9 @@ app.config([
   "$authProvider",
   function($authProvider) {
     $authProvider.configure({
-      withPermission: true, // by default set false
+      tokenStorage : 'localStorage', // by default cookie
 
+      withPermission: true, // by default set false
       rolePropertyName: "userRole", // property name of role which become from server
 
       permissionPropertyName: "userPermissions", // property name of permission which become from server.
@@ -64,7 +65,7 @@ There is a full example in the sample Folder.
 App.congif.$inject = ["$authProvider"];
 function AppConfig(authProvider) {
   authProvider.configure({
-
+      
     withPermission: true,
     permissionPropertyName: "userPermissions",
 

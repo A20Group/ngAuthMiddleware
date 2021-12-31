@@ -15,7 +15,7 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
         $urlRouter.listen();
     };
 
-    //After SignIn And SignOut Action Handler 
+    //After SignIn And SignOut Action Handler
     service.signHandler = function (action, target) {
         if (!target) {
             return;
@@ -123,12 +123,16 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
 
     };
 
-    service.saveAuthData = function (authData) {
+    service.saveAuthData = function (authData,tokenStorage) {
         let rawAuthData = authData;
         var encryptAuthData = CryptoJS.AES.encrypt(
             JSON.stringify(rawAuthData),
             SECRETKEY
         ).toString();
+        if (tokenStorage === 'localStorage') {
+            localStorage["authData"] = encryptAuthData;
+            return;
+        }
         let expires_in = rawAuthData.expires_in;
         let date = new Date();
         date.setTime(date.getTime() + expires_in * 1000);
@@ -229,11 +233,17 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
         return true;
     }
 
-    service.getAuthData = function (config = { withPermission: false, permissionPropertyName: "permission" }) {
-        let authData = $cookies.get("authData");
+    service.getAuthData = function (config = { permissionPropertyName: "permission" }) {
+        let authData;
+        if (config.tokenStorage === 'localStorage') {
+            authData = localStorage["authData"];
+        } else {
+            authData = $cookies.get("authData");
+        }
+
 
         if (service.IsValidJSONString(authData)) {
-            service.clearAuthData();
+            service.clearAuthData(config.tokenStorage);
             return false;
         }
 
@@ -259,8 +269,12 @@ function authService($cookies, PermPermissionStore, $urlRouter, $state, $timeout
         }
     };
 
-    service.clearAuthData = function () {
-        $cookies.remove("authData");
+    service.clearAuthData = function (tokenStorage) {
+        if (tokenStorage === 'localStorage') {
+            localStorage.removeItem("authData");
+        } else {
+            $cookies.remove("authData");
+        }
         localStorage.removeItem("permissionData");
     };
 }
